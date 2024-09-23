@@ -1,0 +1,55 @@
+
+import base64
+
+def xor_with_key_decrypt(hex_input, key):
+    xored = ""
+    for i in range(0, len(hex_input), 2):
+        hex_char = int(hex_input[i:i+2], 16)
+        hex_char ^= key
+        xored += f'{hex_char:02x}'
+    return xored
+
+def decrypt_flag(encrypted_flag):
+    # Step 1: Reverse XOR with key
+    xored_result = xor_with_key_decrypt(encrypted_flag, 9)
+    
+    # Step 2: Convert hex to string
+    def from_hex(hex_str):
+        bytes_object = bytes.fromhex(hex_str)
+        return bytes_object.decode()
+
+    # Step 3: Reverse character shifting by 25
+    def reverse_shift(input_str, amount):
+        result = ""
+        for c in input_str:
+            if c.isalpha():
+                base = 'A' if c.isupper() else 'a'
+                offset = (ord(c) - ord(base) + amount) % 26
+                if offset < 0:
+                    offset += 26
+                c = chr(ord(base) + offset)
+            result += c
+        return result
+
+    # Step 4: Reverse string
+    def reverse_str(input_str):
+        return input_str[::-1]
+
+    # Step 5: Decoding Base64
+    def from_base64(encoded_str):
+        return base64.b64decode(encoded_str).decode()
+
+    # Reverse 
+    hex_to_str = from_hex(xored_result)
+    shifted_back = reverse_shift(hex_to_str, 1)
+    reversed_str = reverse_str(shifted_back)
+    original_flag = from_base64(reversed_str)
+    
+    return original_flag
+
+# Encrypted flag as given
+known_encrypted_flag = "34395e5039624e476c6e4f6a7e6b3a5e705c5f45714c4f507d5c3a683d3138507e3d5f7339624f457b484e6d707b3a506e7e6558"
+original_flag = decrypt_flag(known_encrypted_flag)
+print(f"Original Flag: {original_flag}")
+
+# I GOT THE FLAG BY THIS CODE AND THE FLAG IS - Flag{3xpl0itin1g_8oundar1es_w1th_8yte}
